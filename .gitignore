@@ -85,3 +85,15 @@ pnpm-debug.log*
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# ---------------------------------------------------------------
+# AI coding agents / Matt Pocock skills
+# ---------------------------------------------------------------
+
+# Local third-party skills (if installed here)
+.agents/skills/
+.claude/skills/
+.cursor/skills/
+
+# Personal agent configuration and temporary data
+.claude/settings.local.json
