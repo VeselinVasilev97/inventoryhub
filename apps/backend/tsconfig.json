@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    /* Module system (NestJS default: CommonJS output, Node-style resolution) */
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolvePackageJsonExports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "types": ["node", "jest"],
+
+    /* Required by NestJS dependency injection */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    /* Output */
+    "outDir": "./dist",
+    "rootDir": ".",
+    "sourceMap": true,
+    "removeComments": true,
+
+    /* Type safety */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "useUnknownInCatchVariables": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": ["src", "test", "prisma.config.ts"]
+}

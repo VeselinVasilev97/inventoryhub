@@ -1,0 +1,48 @@
+{
+  "name": "inventory-management",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Inventory Management System monorepo (React + NestJS + PostgreSQL)",
+  "license": "UNLICENSED",
+  "workspaces": [
+    "apps/frontend",
+    "apps/backend"
+  ],
+  "engines": {
+    "node": ">=22.22.0",
+    "npm": ">=10"
+  },
+  "scripts": {
+    "dev:frontend": "npm run dev --workspace=@inventory/frontend",
+    "dev:backend": "npm run start:dev --workspace=@inventory/backend",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces",
+    "lint:fix": "npm run lint:fix --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "test": "npm run test --workspace=@inventory/backend",
+    "test:e2e": "npm run test:e2e --workspace=@inventory/backend",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:up": "docker compose up -d postgres",
+    "db:stop": "docker compose stop postgres",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres",
+    "db:ps": "docker compose ps",
+    "prisma:validate": "npm run prisma:validate --workspace=@inventory/backend",
+    "prisma:generate": "npm run prisma:generate --workspace=@inventory/backend",
+    "db:migrate:dev": "npm run migrate:dev --workspace=@inventory/backend --",
+    "db:migrate:create": "npm run migrate:create --workspace=@inventory/backend --",
+    "db:migrate:deploy": "npm run migrate:deploy --workspace=@inventory/backend",
+    "db:migrate:status": "npm run migrate:status --workspace=@inventory/backend",
+    "db:migrate:diff": "npm run migrate:diff --workspace=@inventory/backend"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.10"
+  },
+  "allowScripts": {
+    "prisma@7.10.1": true,
+    "@prisma/engines@7.10.1": true,
+    "unrs-resolver": false,
+    "@parcel/watcher": false
+  }
+}

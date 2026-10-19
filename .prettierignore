@@ -1,0 +1,8 @@
+node_modules/
+dist/
+build/
+coverage/
+package-lock.json
+apps/backend/src/generated/
+# Generated migrations are reviewed by hand but never reformatted.
+apps/backend/prisma/migrations/
