@@ -12,6 +12,8 @@ A learning project with a production-minded foundation:
 > features (auth, CRUD, inventory processing, orders, UI) are intentionally not
 > implemented.
 
+**Quick reference:** every everyday command is in [COMMANDS.md](COMMANDS.md).
+
 ---
 
 ## Table of contents
@@ -32,6 +34,8 @@ A learning project with a production-minded foundation:
 14. [Running lint, type checks, and tests](#14-running-lint-type-checks-and-tests)
 15. [Database design notes](#15-database-design-notes)
 16. [Architectural decisions](#16-architectural-decisions)
+17. [AI agent skills](#17-ai-agent-skills)
+18. [Troubleshooting](#18-troubleshooting)
 
 ---
 
@@ -56,11 +60,29 @@ docker compose version
 > You can also use a PostgreSQL server installed natively instead of Docker.
 > Just point `DATABASE_URL` at it (see [section 6](#6-postgresql-connection)).
 
+### Windows notes
+
+- **Docker Desktop needs WSL 2.** WSL 2 needs hardware virtualization (enabled
+  in the BIOS/UEFI) and the Windows "Virtual Machine Platform" feature. If
+  Docker reports _"Docker Desktop is unable to start"_ or `wsl --status` says
+  virtualization is not enabled, run this in an **administrator** PowerShell,
+  then restart Windows:
+
+  ```powershell
+  wsl --install --no-distribution
+  ```
+
+- **Restart VS Code / terminals after installing tools.** A terminal keeps the
+  `PATH` it started with. If `git` or `docker` is _"not recognized"_ right after
+  installing it, quit VS Code completely (File → Exit) or restart Windows.
+- Docker Desktop must be **running** (whale icon in the tray) before any
+  `npm run db:*` command.
+
 ## 2. Installation
 
 ```bash
-git clone <your-repo-url> inventory-management
-cd inventory-management
+git clone https://github.com/VeselinVasilev97/inventoryhub.git
+cd inventoryhub
 npm install
 ```
 
@@ -78,7 +100,7 @@ Always run `npm install` from the root, never inside `apps/*`.
 ## 3. Project structure
 
 ```text
-inventory-management/
+inventoryhub/
 ├── apps/
 │   ├── backend/                      # NestJS REST API
 │   │   ├── prisma/
@@ -115,7 +137,10 @@ inventory-management/
 ├── docker-compose.yml                # PostgreSQL only
 ├── .env.example                      # Docker Compose (database) credentials
 ├── package.json                      # Workspace root + scripts
+├── skills-lock.json                  # Pinned AI agent skills (section 17)
+├── .agents/skills/                   # Installed skills (git-ignored)
 ├── .prettierrc.json  .editorconfig  .gitattributes  .gitignore
+├── COMMANDS.md                       # Command cheat sheet
 └── README.md
 ```
 
@@ -378,9 +403,10 @@ data.** To move data as well, combine this with a backup and restore
 On the new machine:
 
 ```bash
-git clone <your-repo-url> inventory-management
-cd inventory-management
+git clone https://github.com/VeselinVasilev97/inventoryhub.git
+cd inventoryhub
 npm install
+npx skills experimental_install   # optional: restore AI agent skills (section 17)
 
 # Create the three .env files (section 4) and set credentials.
 cp .env.example .env
@@ -634,3 +660,40 @@ suppliers over deleting them.
   (`noUncheckedIndexedAccess`, `noImplicitOverride`, …). `any` is a lint error.
 - **Docker for PostgreSQL only.** The apps run natively for fast reloads and
   easy debugging.
+
+## 17. AI agent skills
+
+The project uses [Matt Pocock's skills](https://github.com/mattpocock/skills)
+(instructions for AI coding agents such as Claude Code, e.g. `tdd`,
+`code-review`, `domain-modeling`).
+
+| File / folder      | In Git?    | Purpose                                                     |
+| ------------------ | ---------- | ----------------------------------------------------------- |
+| `skills-lock.json` | ✅ yes     | Which skills are installed, their source and a content hash |
+| `.agents/skills/`  | ❌ ignored | The downloaded skill files (re-created from the lock file)  |
+
+| Command                                      | What it does                                        |
+| -------------------------------------------- | --------------------------------------------------- |
+| `npx skills experimental_install`            | Restore all skills from `skills-lock.json` (new PC) |
+| `npx skills list`                            | List installed skills                               |
+| `npx skills update`                          | Update skills to their latest versions              |
+| `npx skills add mattpocock/skills --skill=x` | Add another skill (updates `skills-lock.json`)      |
+| `npx skills remove x`                        | Remove a skill                                      |
+
+Commit `skills-lock.json` after adding, updating or removing skills. The
+`skills` CLI needs `git` on your `PATH` (see
+[Troubleshooting](#18-troubleshooting)).
+
+## 18. Troubleshooting
+
+| Problem                                                        | Cause                                                | Fix                                                                                                                                                         |
+| -------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Port 5173 is already in use` (or 3000)                        | An old dev server is still running                   | `Get-NetTCPConnection -LocalPort 5173` → `Stop-Process -Id <OwningProcess>`                                                                                 |
+| `failed to connect to the docker API ... pipe`                 | Docker Desktop is not running                        | Start Docker Desktop and wait until it is ready                                                                                                             |
+| `Docker Desktop is unable to start`                            | WSL 2 / Virtual Machine Platform missing             | See [Windows notes](#windows-notes)                                                                                                                         |
+| `git` / `docker` _"not recognized"_, or `spawn git ENOENT`     | Terminal started before the tool was installed       | Quit VS Code completely or restart Windows                                                                                                                  |
+| `Config validation error: DATABASE_URL ...`                    | `apps/backend/.env` missing or wrong                 | Copy `apps/backend/.env.example` to `.env` and check the values. Run the API through npm scripts, which start it from `apps/backend` so its `.env` is found |
+| `/api/health` returns 503 (`"database":"down"`)                | PostgreSQL not running or wrong credentials          | `npm run db:up`, `npm run db:ps`, compare `.env` with `apps/backend/.env`                                                                                   |
+| `password authentication failed`                               | `.env` password changed after the volume was created | See [Docker notes](#notes): credentials apply only on first volume creation                                                                                 |
+| TypeScript can't find `../generated/prisma/client`             | Prisma Client not generated                          | `npm run prisma:generate`                                                                                                                                   |
+| `npm warn install-scripts ... not yet covered by allowScripts` | A new package version wants to run an install script | Review it, then `npm install-scripts approve <pkg>` (see [Installation](#2-installation))                                                                   |
